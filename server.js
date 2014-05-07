@@ -29,7 +29,7 @@ function main(callback) {
                         };
                     }
                 }
-                vhosts = DEEPMERGE(vhosts, pioConfig["config.plugin"][pluginId].vhosts);
+                vhosts = DEEPMERGE(vhosts, _vhosts);
             }
         }
     }
@@ -46,7 +46,7 @@ function main(callback) {
         var qs = urlParts.query ? QUERYSTRING.parse(urlParts.query) : {};
 
         var host = (req.headers.host && req.headers.host.split(":").shift()) || null;
-        if (!vhosts[host] && host !== pioConfig.config.pio.hostname) {
+        if (!vhosts[host]) {
             res.writeHead(404);
             console.error("Virtual host '" + host + "' not found!", req.url, req.headers);
             return res.end("Virtual host '" + host + "' not found!");
