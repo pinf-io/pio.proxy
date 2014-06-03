@@ -72,6 +72,17 @@ function main(callback) {
         }
 
         try {
+            // @see http://stackoverflow.com/a/19524949/330439
+            var ip =
+                req.headers['x-forwarded-for'] || 
+                req.connection.remoteAddress || 
+                req.socket.remoteAddress ||
+                req.connection.socket.remoteAddress;
+            req.headers['x-forwarded-for'] = ip + (
+                req.headers['x-forwarded-for'] ?
+                    ", " + req.headers['x-forwarded-for'] :
+                    ""
+            );
 
 //                console.log("Proxy request", req.url, "for", "http://" + vhosts[host]);
 
