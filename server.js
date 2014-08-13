@@ -46,10 +46,21 @@ function main(callback) {
         var qs = urlParts.query ? QUERYSTRING.parse(urlParts.query) : {};
 
         var host = (req.headers.host && req.headers.host.split(":").shift()) || null;
+        var vhostId = host;
         if (!vhosts[host]) {
-            res.writeHead(404);
-            console.error("Virtual host '" + host + "' not found!", req.url, req.headers);
-            return res.end("Virtual host '" + host + "' not found!");
+            for (var rule in vhosts) {
+                if (/^\*/.test(rule)) {
+                    if (host.substring(host.length-rule.length+1) === rule.substring(1)) {
+                        vhostId = rule;
+                        break;
+                    }
+                }
+            }
+            if (vhostId === host) {
+                res.writeHead(404);
+                console.error("Virtual host '" + host + "' not found!", req.url, req.headers);
+                return res.end("Virtual host '" + host + "' not found!");
+            }
         }
 
         var origin = null;
@@ -84,10 +95,10 @@ function main(callback) {
                     ""
             );
 
-//                console.log("Proxy request", req.url, "for", "http://" + vhosts[host]);
+//            console.log("Proxy request", req.url, "for", "http://" + vhosts[vhostId].target);
 
             return proxy.web(req, res, {
-                target: "http://" + vhosts[host].target
+                target: "http://" + vhosts[vhostId].target
             }, function(err) {
                 if (err.code === "ECONNREFUSED") {
                     res.writeHead(502);
