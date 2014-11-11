@@ -34,6 +34,9 @@ function main(callback) {
         }
     }
     console.log("vhosts", JSON.stringify(vhosts, null, 4));
+
+    var requestCount = 0;
+
     var proxy = HTTP_PROXY.createProxyServer({});
     var server = HTTP.createServer(function(req, res) {
         function respond500(err) {
@@ -44,6 +47,31 @@ function main(callback) {
         }
         var urlParts = URL.parse(req.url);
         var qs = urlParts.query ? QUERYSTRING.parse(urlParts.query) : {};
+
+
+        if (urlParts.path === "/_internal_status") {
+
+            if (!req.headers["x-auth-token"]) {
+                return next();
+            }
+            if (req.headers["x-auth-token"] !== pioConfig.config["pio.service"].config.internalStatusAuthToken) {
+                return next(new Error("'x-auth-token' is invalid"));
+            }
+
+            var payload = {
+                process: {
+                    memoryUsage: process.memoryUsage()
+                },
+                server: {
+                    requestCount: requestCount
+                }
+            };
+
+            return res.end(JSON.stringify(payload, null, 4));
+        }
+
+        requestCount += 1;
+
 
         var host = (req.headers.host && req.headers.host.split(":").shift()) || null;
         if (!host) {
