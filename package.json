@@ -6,7 +6,7 @@
   "dependencies": {
     "fs-extra": "~0.8.1",
     "deepmerge": "~0.2.7",
-    "http-proxy": "~1.0.1"
+    "http-proxy": "~1.11.1"
   },
   "config": {
     "pio.deploy.converter": {
